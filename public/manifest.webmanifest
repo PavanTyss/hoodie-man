@@ -1,0 +1,21 @@
+{
+  "name": "Hoodie Man",
+  "short_name": "Hoodie Man",
+  "description": "Premium hoodies, t-shirts, and apparel.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "/next.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/vercel.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
