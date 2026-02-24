@@ -6,10 +6,13 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useState, use, useEffect } from 'react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { ArrowLeft, Heart, Star, ZoomIn } from 'lucide-react';
 import { Product } from '@/types/product';
 import ShareButtons from '@/components/ShareButtons';
 import ProductCard from '@/components/ProductCard';
+import Button from '@/components/ui/Button';
+import { formatPrice, PRODUCT_PLACEHOLDER_IMAGE } from '@/lib/format';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -20,8 +23,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
   const [shareUrl, setShareUrl] = useState('');
   const [brokenImageIndexes, setBrokenImageIndexes] = useState<Record<number, true>>({});
-  const placeholderSrc = '/product-placeholder.svg';
-  
+
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedImage, setSelectedImage] = useState(0);
@@ -29,17 +31,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/products/${id}`).then(res => res.json()),
-      fetch('/api/products').then(res => res.json())
-    ]).then(([productData, allProducts]) => {
-      setProduct(productData);
-      // Get related products from same category
-      const related = allProducts
-        .filter((p: Product) => p.category === productData.category && p.id !== productData.id)
-        .slice(0, 4);
-      setRelatedProducts(related);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+      fetch(`/api/products/${id}`).then((res) => res.json()),
+      fetch('/api/products').then((res) => res.json()),
+    ])
+      .then(([productData, allProducts]) => {
+        setProduct(productData);
+        // Get related products from same category
+        const related = allProducts
+          .filter((p: Product) => p.category === productData.category && p.id !== productData.id)
+          .slice(0, 4);
+        setRelatedProducts(related);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
@@ -60,12 +64,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) {
-      alert('Please select size and color');
+      toast.error('Please select size and color');
       return;
     }
-    
+
     addToCart(product, selectedSize, selectedColor);
     setShowSuccess(true);
+    toast.success('Added to cart');
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
@@ -77,14 +82,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  const rating = (product as any).rating || 4.5;
-  const reviewCount = (product as any).reviewCount || 0;
-  const discount = (product as any).discount || 0;
+  const rating = product.rating ?? 4.5;
+  const reviewCount = product.reviewCount ?? 0;
+  const discount = product.discount ?? 0;
   const finalPrice = discount > 0 ? product.price * (1 - discount / 100) : product.price;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Link href="/" className="flex items-center text-blue-600 hover:text-blue-700 mb-8">
+      <Link href="/" className="flex items-center text-primary hover:text-primary/90 mb-8">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to Products
       </Link>
@@ -92,57 +97,64 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Images */}
         <div>
-          <div className="relative bg-gray-200 rounded-lg h-96 mb-4 overflow-hidden group">
+          <div className="relative bg-muted rounded-xl h-96 mb-4 overflow-hidden group">
             <Image
               src={
                 brokenImageIndexes[selectedImage]
-                  ? placeholderSrc
-                  : product.images?.[selectedImage] || placeholderSrc
+                  ? PRODUCT_PLACEHOLDER_IMAGE
+                  : product.images?.[selectedImage] || PRODUCT_PLACEHOLDER_IMAGE
               }
               alt={product.name}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
               priority
-              onError={() =>
-                setBrokenImageIndexes((prev) => ({ ...prev, [selectedImage]: true }))
-              }
+              onError={() => setBrokenImageIndexes((prev) => ({ ...prev, [selectedImage]: true }))}
             />
-            <button className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-              <ZoomIn className="h-5 w-5 text-gray-700" />
+            <button className="absolute top-4 right-4 bg-card text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Zoom">
+              <ZoomIn className="h-5 w-5" />
             </button>
             {discount > 0 && (
-              <span className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 text-sm font-semibold rounded">
+              <span className="absolute top-4 left-4 bg-error text-primary-foreground px-3 py-1 text-sm font-semibold rounded">
                 {discount}% OFF
               </span>
             )}
           </div>
-          <div className="grid grid-cols-4 gap-4">
-            {product.images.map((image, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedImage(i)}
-                className={`relative bg-gray-200 rounded h-20 overflow-hidden border-2 transition ${
-                  selectedImage === i ? 'border-blue-600' : 'border-transparent'
-                }`}
-              >
-                <Image
-                  src={brokenImageIndexes[i] ? placeholderSrc : image}
-                  alt={`${product.name} ${i + 1}`}
-                  fill
-                  className="object-cover"
-                  onError={() =>
-                    setBrokenImageIndexes((prev) => ({ ...prev, [i]: true }))
-                  }
-                />
-              </button>
-            ))}
-          </div>
+          {(product.images ?? []).length > 0 ? (
+            <div className="grid grid-cols-4 gap-4">
+              {(product.images ?? []).map((image, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedImage(i)}
+                  className={`relative bg-muted rounded h-20 overflow-hidden border-2 transition ${
+                    selectedImage === i ? 'border-primary' : 'border-transparent'
+                  }`}
+                >
+                  <Image
+                    src={brokenImageIndexes[i] ? PRODUCT_PLACEHOLDER_IMAGE : image}
+                    alt={`${product.name} ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    onError={() => setBrokenImageIndexes((prev) => ({ ...prev, [i]: true }))}
+                  />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="relative bg-muted rounded h-20 w-20 overflow-hidden border-2 border-primary">
+              <Image
+                src={PRODUCT_PLACEHOLDER_IMAGE}
+                alt="No image"
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
         </div>
 
         {/* Product Details */}
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
-          
+          <h1 className="text-4xl font-bold text-foreground mb-4">{product.name}</h1>
+
           {/* Rating */}
           {reviewCount > 0 && (
             <div className="flex items-center gap-2 mb-4">
@@ -151,12 +163,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   <Star
                     key={i}
                     className={`h-5 w-5 ${
-                      i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                      i < Math.floor(rating) ? 'fill-warning text-warning' : 'text-muted'
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-muted-foreground">
                 {rating.toFixed(1)} ({reviewCount} reviews)
               </span>
             </div>
@@ -165,38 +177,34 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <div className="flex items-center gap-3 mb-6">
             {discount > 0 ? (
               <>
-                <span className="text-3xl font-bold text-blue-600">
-                  ${finalPrice.toFixed(2)}
+                <span className="text-3xl font-bold text-primary">{formatPrice(finalPrice)}</span>
+                <span className="text-xl text-muted-foreground line-through">
+                  {formatPrice(product.price)}
                 </span>
-                <span className="text-xl text-gray-500 line-through">
-                  ${product.price.toFixed(2)}
-                </span>
-                <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-sm font-semibold">
-                  Save ${(product.price - finalPrice).toFixed(2)}
+                <span className="bg-error/10 text-error px-2 py-1 rounded text-sm font-semibold">
+                  Save {formatPrice(product.price - finalPrice)}
                 </span>
               </>
             ) : (
-              <span className="text-3xl font-bold text-blue-600">
-                ${product.price.toFixed(2)}
-              </span>
+              <span className="text-3xl font-bold text-primary">{formatPrice(product.price)}</span>
             )}
           </div>
-          
-          <p className="text-gray-700 mb-6">{product.description}</p>
+
+          <p className="text-muted-foreground mb-6">{product.description}</p>
 
           {/* Share Buttons */}
           <div className="mb-6">
-            <ShareButtons
-              url={shareUrl}
-              title={product.name}
-            />
+            <ShareButtons url={shareUrl} title={product.name} />
           </div>
 
           {/* Size Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Select Size
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-semibold text-foreground">Select Size</label>
+              <Link href="/size-guide" className="text-sm text-primary hover:underline">
+                Size guide
+              </Link>
+            </div>
             <div className="flex gap-2">
               {product.sizes.map((size) => (
                 <button
@@ -216,9 +224,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Color Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Select Color
-            </label>
+            <label className="block text-sm font-semibold text-foreground mb-2">Select Color</label>
             <div className="flex gap-2">
               {product.colors.map((color) => (
                 <button
@@ -226,8 +232,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   onClick={() => setSelectedColor(color)}
                   className={`px-4 py-2 border-2 rounded-lg font-semibold transition ${
                     selectedColor === color
-                      ? 'border-blue-600 bg-blue-50 text-blue-600'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border hover:border-primary/50'
                   }`}
                 >
                   {color}
@@ -238,27 +244,31 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Stock Status */}
           <div className="mb-6">
-            <span className={`text-sm font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <span
+              className={`text-sm font-semibold ${product.stock > 0 ? 'text-success' : 'text-error'}`}
+            >
               {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
             </span>
           </div>
 
           {/* Add to Cart and Wishlist Buttons */}
           <div className="flex gap-3 mb-6">
-            <button
+            <Button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="flex-1 bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="flex-1"
+              size="lg"
             >
               {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-            </button>
+            </Button>
             <button
               onClick={toggleWishlist}
               className={`px-6 py-4 rounded-lg border-2 transition ${
                 isInWishlist(product.id)
-                  ? 'bg-red-50 border-red-500 text-red-500'
-                  : 'border-gray-300 hover:border-red-500 hover:text-red-500'
+                  ? 'bg-error/10 border-error text-error'
+                  : 'border-border hover:border-error hover:text-error'
               }`}
+              aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <Heart className={`h-6 w-6 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>

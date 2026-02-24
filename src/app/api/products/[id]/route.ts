@@ -10,20 +10,17 @@ function parseProduct(product: any) {
   };
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const product = await prisma.product.findUnique({
       where: { id },
     });
-    
+
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
-    
+
     return NextResponse.json(parseProduct(product));
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });

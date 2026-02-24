@@ -12,9 +12,8 @@ export function createRateLimiter(config: RateLimitConfig) {
   const { windowMs, maxRequests } = config;
 
   return function rateLimitMiddleware(request: NextRequest) {
-    const identifier = request.headers.get('x-forwarded-for') || 
-                      request.headers.get('x-real-ip') || 
-                      'unknown';
+    const identifier =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
 
     const now = Date.now();
     const record = rateLimit.get(identifier);
@@ -34,7 +33,7 @@ export function createRateLimiter(config: RateLimitConfig) {
 
     if (record.count >= maxRequests) {
       const retryAfter = Math.ceil((record.resetTime - now) / 1000);
-      
+
       return NextResponse.json(
         {
           error: 'Too many requests',

@@ -9,6 +9,14 @@ export interface Product {
   colors: string[];
   stock: number;
   featured?: boolean;
+  /** Average rating 0–5 (from Review model or stored on product) */
+  rating?: number;
+  /** Number of reviews (from Review model or stored on product) */
+  reviewCount?: number;
+  /** Percentage discount (0–100) */
+  discount?: number;
+  /** ISO date string from API */
+  createdAt?: string;
 }
 
 export interface CartItem extends Product {

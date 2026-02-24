@@ -4,10 +4,14 @@ export const products: Product[] = [
   {
     id: '1',
     name: 'Classic Black Hoodie',
-    description: 'Premium quality cotton blend hoodie with a comfortable fit. Perfect for everyday wear.',
+    description:
+      'Premium quality cotton blend hoodie with a comfortable fit. Perfect for everyday wear.',
     price: 49.99,
     category: 'hoodies',
-    images: ['https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500', 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500'],
+    images: [
+      'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500',
+      'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500',
+    ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: ['Black', 'Charcoal'],
     stock: 50,
@@ -97,11 +101,9 @@ export const products: Product[] = [
 
 export const getProducts = () => products;
 
-export const getProductById = (id: string) => 
-  products.find(product => product.id === id);
+export const getProductById = (id: string) => products.find((product) => product.id === id);
 
 export const getProductsByCategory = (category: Product['category']) =>
-  products.filter(product => product.category === category);
+  products.filter((product) => product.category === category);
 
-export const getFeaturedProducts = () =>
-  products.filter(product => product.featured);
+export const getFeaturedProducts = () => products.filter((product) => product.featured);

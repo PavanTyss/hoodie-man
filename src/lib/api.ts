@@ -1,29 +1,45 @@
 import { Product } from '@/types/product';
 
-// For client-side use
+/**
+ * Fetches all products from the API (client-side).
+ * @throws Error if the request fails
+ */
 export async function getProducts() {
   const response = await fetch('/api/products', { cache: 'no-store' });
   if (!response.ok) throw new Error('Failed to fetch products');
   return response.json();
 }
 
+/**
+ * Fetches a single product by ID (client-side).
+ * @returns The product or null if not found
+ */
 export async function getProductById(id: string) {
   const response = await fetch(`/api/products/${id}`, { cache: 'no-store' });
   if (!response.ok) return null;
   return response.json();
 }
 
-// Helper function to parse JSON fields in products
-function parseProduct(product: any): Product {
+/** Parses Prisma JSON fields (images, sizes, colors) into Product shape. */
+function parseProduct(
+  product: {
+    images?: string | string[];
+    sizes?: string | string[];
+    colors?: string | string[];
+  } & Record<string, unknown>
+): Product {
+  const p = product as Record<string, unknown>;
   return {
-    ...product,
-    images: typeof product.images === 'string' ? JSON.parse(product.images) : product.images,
-    sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
-    colors: typeof product.colors === 'string' ? JSON.parse(product.colors) : product.colors,
-  };
+    ...p,
+    images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images as string[]),
+    sizes: typeof p.sizes === 'string' ? JSON.parse(p.sizes) : (p.sizes as string[]),
+    colors: typeof p.colors === 'string' ? JSON.parse(p.colors) : (p.colors as string[]),
+  } as Product;
 }
 
-// Server-side functions for direct database access
+/**
+ * Fetches all products from the database (server-side). Use in RSC or API.
+ */
 export async function getProductsFromDB() {
   const { prisma } = await import('@/lib/prisma');
   const products = await prisma.product.findMany({
@@ -32,6 +48,7 @@ export async function getProductsFromDB() {
   return products.map(parseProduct);
 }
 
+/** Fetches a single product by ID from the database (server-side). */
 export async function getProductByIdFromDB(id: string) {
   const { prisma } = await import('@/lib/prisma');
   const product = await prisma.product.findUnique({
@@ -40,6 +57,7 @@ export async function getProductByIdFromDB(id: string) {
   return product ? parseProduct(product) : null;
 }
 
+/** Fetches products by category from the database (server-side). */
 export async function getProductsByCategoryFromDB(category: string) {
   const { prisma } = await import('@/lib/prisma');
   const products = await prisma.product.findMany({
@@ -49,6 +67,7 @@ export async function getProductsByCategoryFromDB(category: string) {
   return products.map(parseProduct);
 }
 
+/** Fetches featured products from the database (server-side). */
 export async function getFeaturedProductsFromDB() {
   const { prisma } = await import('@/lib/prisma');
   const products = await prisma.product.findMany({

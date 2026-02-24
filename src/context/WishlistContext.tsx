@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product } from '@/types/product';
 
+/** Wishlist state: array of products persisted in localStorage. Actions: add, remove, check, count. */
 interface WishlistContextType {
   wishlist: Product[];
   addToWishlist: (product: Product) => void;
@@ -13,6 +14,7 @@ interface WishlistContextType {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
+/** Provides wishlist state and actions; persists to localStorage. */
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [wishlist, setWishlist] = useState<Product[]>([]);
 

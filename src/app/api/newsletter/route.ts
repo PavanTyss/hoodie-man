@@ -15,19 +15,13 @@ export async function POST(request: NextRequest) {
 
     // Validate email
     if (!email || typeof email !== 'string') {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     const sanitizedEmail = sanitizeEmail(email);
 
     if (!isValidEmail(sanitizedEmail)) {
-      return NextResponse.json(
-        { error: 'Invalid email address' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
     // Check if already subscribed

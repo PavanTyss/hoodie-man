@@ -1,11 +1,14 @@
 import { prisma } from '../src/lib/prisma';
 
 async function main() {
-  // Clear existing data
+  // Clear existing data (order of dependencies)
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.wishlist.deleteMany();
   await prisma.product.deleteMany();
-  
+  await prisma.promoCode.deleteMany();
+
   // Create products
   const products = [
     {
@@ -103,6 +106,18 @@ async function main() {
       data: product,
     });
   }
+
+  // Seed promo codes for testing checkout
+  const now = new Date();
+  const validFrom = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const validUntil = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  await prisma.promoCode.createMany({
+    data: [
+      { code: 'WELCOME10', discount: 10, minAmount: 0, validFrom, validUntil, active: true },
+      { code: 'SAVE20', discount: 20, minAmount: 50, validFrom, validUntil, active: true },
+    ],
+  });
 
   console.log('✅ Database seeded successfully!');
 }

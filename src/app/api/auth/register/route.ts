@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const normalizedEmail = sanitizeEmail(String(email));
 
     const existing = await prisma.user.findFirst({
-      where: { email: { equals: normalizedEmail, mode: 'insensitive' } }
+      where: { email: { equals: normalizedEmail, mode: 'insensitive' } },
     });
 
     if (existing) {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         password: hashedPassword,
         name,
         role: 'customer',
-      }
+      },
     });
 
     return NextResponse.json({
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
         id: user.id,
         email: user.email,
         name: user.name,
-      }
+      },
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });

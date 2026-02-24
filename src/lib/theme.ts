@@ -1,0 +1,97 @@
+/**
+ * Design tokens for the Hoodie Man e-commerce app.
+ * Use these for consistent colors, typography, and spacing across light/dark modes.
+ */
+
+export const theme = {
+  colors: {
+    light: {
+      background: '#ffffff',
+      foreground: '#171717',
+      primary: '#2563eb',
+      primaryForeground: '#ffffff',
+      secondary: '#64748b',
+      secondaryForeground: '#f8fafc',
+      accent: '#7c3aed',
+      success: '#16a34a',
+      error: '#dc2626',
+      warning: '#ca8a04',
+      muted: '#f1f5f9',
+      mutedForeground: '#64748b',
+      border: '#e2e8f0',
+      card: '#ffffff',
+      cardForeground: '#171717',
+    },
+    dark: {
+      background: '#0a0a0a',
+      foreground: '#ededed',
+      primary: '#3b82f6',
+      primaryForeground: '#ffffff',
+      secondary: '#94a3b8',
+      secondaryForeground: '#0f172a',
+      accent: '#8b5cf6',
+      success: '#22c55e',
+      error: '#ef4444',
+      warning: '#eab308',
+      muted: '#1e293b',
+      mutedForeground: '#94a3b8',
+      border: '#334155',
+      card: '#171717',
+      cardForeground: '#ededed',
+    },
+  },
+  typography: {
+    fontSans: 'var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif',
+    fontMono: 'var(--font-geist-mono), ui-monospace, monospace',
+    sizes: {
+      xs: '0.75rem',
+      sm: '0.875rem',
+      base: '1rem',
+      lg: '1.125rem',
+      xl: '1.25rem',
+      '2xl': '1.5rem',
+      '3xl': '1.875rem',
+      '4xl': '2.25rem',
+      '5xl': '3rem',
+    },
+    weights: {
+      normal: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700',
+    },
+  },
+  spacing: {
+    0: '0',
+    1: '0.25rem',
+    2: '0.5rem',
+    3: '0.75rem',
+    4: '1rem',
+    5: '1.25rem',
+    6: '1.5rem',
+    8: '2rem',
+    10: '2.5rem',
+    12: '3rem',
+    16: '4rem',
+    20: '5rem',
+    24: '6rem',
+  },
+  radius: {
+    sm: '0.25rem',
+    DEFAULT: '0.5rem',
+    md: '0.5rem',
+    lg: '0.75rem',
+    xl: '1rem',
+    '2xl': '1.5rem',
+    full: '9999px',
+  },
+  shadows: {
+    sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    DEFAULT: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+    lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+    xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+  },
+} as const;
+
+export type ThemeMode = 'light' | 'dark' | 'system';

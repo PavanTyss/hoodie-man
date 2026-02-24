@@ -19,7 +19,12 @@ export interface FilterState {
   inStock: boolean;
 }
 
-export default function ProductFilters({ onFilterChange, onSortChange, categories, priceRange }: FilterProps) {
+export default function ProductFilters({
+  onFilterChange,
+  onSortChange,
+  categories,
+  priceRange,
+}: FilterProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     category: [],
@@ -42,7 +47,7 @@ export default function ProductFilters({ onFilterChange, onSortChange, categorie
   const toggleArrayFilter = (key: 'category' | 'sizes' | 'colors', value: string) => {
     const current = filters[key];
     const updated = current.includes(value)
-      ? current.filter(v => v !== value)
+      ? current.filter((v) => v !== value)
       : [...current, value];
     updateFilters({ [key]: updated });
   };
@@ -60,9 +65,13 @@ export default function ProductFilters({ onFilterChange, onSortChange, categorie
     onFilterChange(cleared);
   };
 
-  const hasActiveFilters = filters.category.length > 0 || filters.sizes.length > 0 || 
-    filters.colors.length > 0 || filters.inStock || 
-    filters.priceMin !== priceRange.min || filters.priceMax !== priceRange.max;
+  const hasActiveFilters =
+    filters.category.length > 0 ||
+    filters.sizes.length > 0 ||
+    filters.colors.length > 0 ||
+    filters.inStock ||
+    filters.priceMin !== priceRange.min ||
+    filters.priceMax !== priceRange.max;
 
   return (
     <div>
@@ -75,9 +84,7 @@ export default function ProductFilters({ onFilterChange, onSortChange, categorie
           <Filter className="h-5 w-5" />
           <span>Filters</span>
           {hasActiveFilters && (
-            <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-              Active
-            </span>
+            <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">Active</span>
           )}
         </button>
 
@@ -176,7 +183,7 @@ export default function ProductFilters({ onFilterChange, onSortChange, categorie
               <h4 className="font-semibold text-gray-900 mb-3">Price Range</h4>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-gray-600">Min: ${filters.priceMin}</label>
+                  <label className="text-xs text-muted-foreground">Min: ₹{filters.priceMin}</label>
                   <input
                     type="range"
                     min={priceRange.min}
@@ -187,7 +194,7 @@ export default function ProductFilters({ onFilterChange, onSortChange, categorie
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-600">Max: ${filters.priceMax}</label>
+                  <label className="text-xs text-muted-foreground">Max: ₹{filters.priceMax}</label>
                   <input
                     type="range"
                     min={priceRange.min}

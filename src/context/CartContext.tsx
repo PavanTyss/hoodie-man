@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CartItem, Product } from '@/types/product';
 
+/** Cart state: items with quantity, size, color. Persisted to localStorage. */
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, size: string, color: string) => void;
@@ -18,7 +19,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
@@ -32,13 +32,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [cart]);
 
   const addToCart = (product: Product, size: string, color: string) => {
-    setCart(prevCart => {
+    setCart((prevCart) => {
       const existingItem = prevCart.find(
-        item => item.id === product.id && item.selectedSize === size && item.selectedColor === color
+        (item) =>
+          item.id === product.id && item.selectedSize === size && item.selectedColor === color
       );
 
       if (existingItem) {
-        return prevCart.map(item =>
+        return prevCart.map((item) =>
           item.id === product.id && item.selectedSize === size && item.selectedColor === color
             ? { ...item, quantity: item.quantity + 1 }
             : item
@@ -50,9 +51,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeFromCart = (productId: string, size: string, color: string) => {
-    setCart(prevCart =>
+    setCart((prevCart) =>
       prevCart.filter(
-        item => !(item.id === productId && item.selectedSize === size && item.selectedColor === color)
+        (item) =>
+          !(item.id === productId && item.selectedSize === size && item.selectedColor === color)
       )
     );
   };
@@ -63,8 +65,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    setCart(prevCart =>
-      prevCart.map(item =>
+    setCart((prevCart) =>
+      prevCart.map((item) =>
         item.id === productId && item.selectedSize === size && item.selectedColor === color
           ? { ...item, quantity }
           : item

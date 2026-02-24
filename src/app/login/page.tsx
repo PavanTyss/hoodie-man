@@ -4,16 +4,18 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
-    setError('');
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
@@ -27,77 +29,55 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        toast.error('Invalid email or password');
       } else {
+        toast.success('Welcome back!');
         router.push('/');
         router.refresh();
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.');
+    } catch (err) {
+      toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-4xl font-bold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-              create a new account
-            </Link>
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
-          </div>
-
+    <div className="min-h-[80vh] flex items-center justify-center bg-muted/30 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="bg-card border border-border rounded-2xl shadow-lg p-8 max-w-md w-full">
+        <div className="space-y-8">
           <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
+            <h2 className="text-2xl font-bold text-foreground text-center">Sign in</h2>
+            <p className="mt-2 text-center text-sm text-muted-foreground">
+              Or{' '}
+              <Link href="/register" className="font-medium text-primary hover:underline">
+                create a new account
+              </Link>
+            </p>
           </div>
-        </form>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <Input label="Email" name="email" type="email" required placeholder="Email address" />
+              <div>
+                <Input
+                  label="Password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Password"
+                />
+                <p className="mt-1 text-right text-sm">
+                  <Link href="/forgot-password" className="text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </p>
+              </div>
+            </div>
+            <Button type="submit" fullWidth loading={loading} disabled={loading}>
+              Sign in
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

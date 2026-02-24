@@ -1,47 +1,44 @@
-import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import Credentials from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
-import { compare } from "bcryptjs"
-import { sanitizeEmail } from "@/lib/validation"
+import NextAuth from 'next-auth';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import Credentials from 'next-auth/providers/credentials';
+import { prisma } from '@/lib/prisma';
+import { compare } from 'bcryptjs';
+import { sanitizeEmail } from '@/lib/validation';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
+  session: { strategy: 'jwt' },
   pages: {
-    signIn: "/login",
+    signIn: '/login',
   },
   providers: [
     Credentials({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          return null;
         }
 
-        const email = sanitizeEmail(String(credentials.email))
+        const email = sanitizeEmail(String(credentials.email));
 
         const user = await prisma.user.findFirst({
           where: {
-            email: { equals: email, mode: "insensitive" }
-          }
-        })
+            email: { equals: email, mode: 'insensitive' },
+          },
+        });
 
         if (!user || !user.password) {
-          return null
+          return null;
         }
 
-        const isPasswordValid = await compare(
-          credentials.password as string,
-          user.password
-        )
+        const isPasswordValid = await compare(credentials.password as string, user.password);
 
         if (!isPasswordValid) {
-          return null
+          return null;
         }
 
         return {
@@ -49,9 +46,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           name: user.name,
           role: (user as any).role,
-        }
-      }
-    })
+        };
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -59,10 +56,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return {
           ...token,
           id: user.id,
-          role: user.role,
-        }
+          role: (user as { role?: string }).role,
+        };
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       return {
@@ -71,8 +68,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           ...session.user,
           id: token.id as string,
           role: token.role as string,
-        }
-      } as any
-    }
-  }
-})
+        },
+      } as any;
+    },
+  },
+});

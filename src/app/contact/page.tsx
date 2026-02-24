@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import Link from 'next/link';
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
+import Button from '@/components/ui/Button';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -24,17 +26,21 @@ export default function ContactPage() {
     }, 1000);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 text-white py-16">
+      <div className="bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Get In Touch</h1>
-          <p className="text-xl text-blue-100">We'd love to hear from you! Send us a message and we'll respond as soon as possible.</p>
+          <p className="text-xl opacity-90">
+            We&apos;d love to hear from you! Send us a message and we&apos;ll respond as soon as possible.
+          </p>
         </div>
       </div>
 
@@ -42,88 +48,90 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Information */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
-              
+            <div className="bg-card border border-border rounded-2xl p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6">Contact Information</h2>
+
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <Mail className="h-6 w-6 text-blue-600" />
+                  <div className="bg-primary/10 p-3 rounded-lg text-primary shrink-0">
+                    <Mail className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">support@hoodieman.com</p>
-                    <p className="text-gray-600">sales@hoodieman.com</p>
+                    <h3 className="font-semibold text-foreground mb-1">Email</h3>
+                    <p className="text-muted-foreground">support@hoodieman.com</p>
+                    <p className="text-muted-foreground">sales@hoodieman.com</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="bg-purple-100 p-3 rounded-lg">
-                    <Phone className="h-6 w-6 text-purple-600" />
+                  <div className="bg-primary/10 p-3 rounded-lg text-primary shrink-0">
+                    <Phone className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Phone</h3>
-                    <p className="text-gray-600">+1 (555) 123-4567</p>
-                    <p className="text-gray-600">+1 (555) 765-4321</p>
+                    <h3 className="font-semibold text-foreground mb-1">Phone</h3>
+                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                    <p className="text-muted-foreground">+1 (555) 765-4321</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="bg-pink-100 p-3 rounded-lg">
-                    <MapPin className="h-6 w-6 text-pink-600" />
+                  <div className="bg-primary/10 p-3 rounded-lg text-primary shrink-0">
+                    <MapPin className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Address</h3>
-                    <p className="text-gray-600">
-                      123 Fashion Street<br />
-                      New York, NY 10001<br />
+                    <h3 className="font-semibold text-foreground mb-1">Address</h3>
+                    <p className="text-muted-foreground">
+                      123 Fashion Street
+                      <br />
+                      New York, NY 10001
+                      <br />
                       United States
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="bg-green-100 p-3 rounded-lg">
-                    <Clock className="h-6 w-6 text-green-600" />
+                  <div className="bg-primary/10 p-3 rounded-lg text-primary shrink-0">
+                    <Clock className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Business Hours</h3>
-                    <p className="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM</p>
-                    <p className="text-gray-600">Saturday: 10:00 AM - 4:00 PM</p>
-                    <p className="text-gray-600">Sunday: Closed</p>
+                    <h3 className="font-semibold text-foreground mb-1">Business Hours</h3>
+                    <p className="text-muted-foreground">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                    <p className="text-muted-foreground">Saturday: 10:00 AM - 4:00 PM</p>
+                    <p className="text-muted-foreground">Sunday: Closed</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* FAQ Quick Links */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Help</h2>
+            <div className="bg-card border border-border rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-foreground mb-4">Quick Help</h2>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
+                  <Link href="/shipping" className="text-primary hover:underline">
                     Shipping Information
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
+                  <Link href="/returns" className="text-primary hover:underline">
                     Return Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
+                  <Link href="/size-guide" className="text-primary hover:underline">
                     Size Guide
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
+                  <Link href="/dashboard" className="text-primary hover:underline">
                     Track Your Order
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
+                  <Link href="/faq" className="text-primary hover:underline">
                     FAQ
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -131,13 +139,13 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
-              
+            <div className="bg-card border border-border rounded-2xl p-8">
+              <h2 className="text-2xl font-bold text-foreground mb-6">Send Us a Message</h2>
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                       Full Name *
                     </label>
                     <input
@@ -147,13 +155,13 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                       placeholder="John Doe"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                       Email Address *
                     </label>
                     <input
@@ -163,14 +171,14 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                       placeholder="john@example.com"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
                     Subject *
                   </label>
                   <select
@@ -179,7 +187,7 @@ export default function ContactPage() {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="">Select a subject</option>
                     <option value="general">General Inquiry</option>
@@ -194,7 +202,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
                     Message *
                   </label>
                   <textarea
@@ -204,38 +212,32 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     rows={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                     placeholder="Tell us how we can help you..."
                   />
                 </div>
 
-                <button
+                <Button
                   type="submit"
+                  fullWidth
+                  size="lg"
                   disabled={status === 'loading'}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  loading={status === 'loading'}
+                  className="gap-2"
                 >
-                  {status === 'loading' ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-5 w-5" />
-                      Send Message
-                    </>
-                  )}
-                </button>
+                  <Send className="h-5 w-5" />
+                  {status === 'loading' ? 'Sending...' : 'Send Message'}
+                </Button>
 
                 {status === 'success' && (
-                  <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+                  <div className="bg-success/10 border border-success text-foreground px-4 py-3 rounded-lg">
                     <p className="font-semibold">Message sent successfully!</p>
-                    <p className="text-sm">We'll get back to you within 24 hours.</p>
+                    <p className="text-sm text-muted-foreground">We&apos;ll get back to you within 24 hours.</p>
                   </div>
                 )}
 
                 {status === 'error' && (
-                  <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                  <div className="bg-error/10 border border-error text-error px-4 py-3 rounded-lg">
                     <p className="font-semibold">Oops! Something went wrong.</p>
                     <p className="text-sm">Please try again later or email us directly.</p>
                   </div>
@@ -246,14 +248,13 @@ export default function ContactPage() {
         </div>
 
         {/* Map Section */}
-        <div className="mt-12 bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="aspect-[21/9] bg-gray-200 relative">
-            {/* Placeholder for map - you can integrate Google Maps or similar */}
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
+        <div className="mt-12 bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="aspect-[21/9] bg-muted relative">
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
               <div className="text-center">
-                <MapPin className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <p className="text-xl font-semibold text-gray-900">Visit Our Store</p>
-                <p className="text-gray-600 mt-2">123 Fashion Street, New York, NY 10001</p>
+                <MapPin className="h-16 w-16 text-primary mx-auto mb-4" />
+                <p className="text-xl font-semibold text-foreground">Visit Our Store</p>
+                <p className="text-muted-foreground mt-2">123 Fashion Street, New York, NY 10001</p>
               </div>
             </div>
           </div>
@@ -261,28 +262,28 @@ export default function ContactPage() {
 
         {/* Additional Info */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail className="h-8 w-8 text-blue-600" />
+          <div className="bg-card border border-border rounded-2xl p-6 text-center">
+            <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+              <Mail className="h-8 w-8" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Fast Response</h3>
-            <p className="text-gray-600">We respond to all inquiries within 24 hours</p>
+            <h3 className="text-lg font-bold text-foreground mb-2">Fast Response</h3>
+            <p className="text-muted-foreground">We respond to all inquiries within 24 hours</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Phone className="h-8 w-8 text-purple-600" />
+          <div className="bg-card border border-border rounded-2xl p-6 text-center">
+            <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+              <Phone className="h-8 w-8" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Phone Support</h3>
-            <p className="text-gray-600">Call us during business hours for immediate help</p>
+            <h3 className="text-lg font-bold text-foreground mb-2">Phone Support</h3>
+            <p className="text-muted-foreground">Call us during business hours for immediate help</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MapPin className="h-8 w-8 text-pink-600" />
+          <div className="bg-card border border-border rounded-2xl p-6 text-center">
+            <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+              <MapPin className="h-8 w-8" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Visit Us</h3>
-            <p className="text-gray-600">Come visit our flagship store in New York</p>
+            <h3 className="text-lg font-bold text-foreground mb-2">Visit Us</h3>
+            <p className="text-muted-foreground">Come visit our flagship store in New York</p>
           </div>
         </div>
       </div>
