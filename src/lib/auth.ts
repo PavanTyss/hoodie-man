@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import Credentials from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
 import { compare } from "bcryptjs"
+import { sanitizeEmail } from "@/lib/validation"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -22,9 +23,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
-        const user = await prisma.user.findUnique({
+        const email = sanitizeEmail(String(credentials.email))
+
+        const user = await prisma.user.findFirst({
           where: {
-            email: credentials.email as string
+            email: { equals: email, mode: "insensitive" }
           }
         })
 

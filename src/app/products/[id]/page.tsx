@@ -18,6 +18,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
+  const [shareUrl, setShareUrl] = useState('');
+  const [brokenImageIndexes, setBrokenImageIndexes] = useState<Record<number, true>>({});
+  const placeholderSrc = '/product-placeholder.svg';
   
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
@@ -37,6 +40,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       setRelatedProducts(related);
       setLoading(false);
     }).catch(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    setShareUrl(window.location.href);
   }, [id]);
 
   if (loading) {
@@ -87,11 +94,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         <div>
           <div className="relative bg-gray-200 rounded-lg h-96 mb-4 overflow-hidden group">
             <Image
-              src={product.images[selectedImage]}
+              src={
+                brokenImageIndexes[selectedImage]
+                  ? placeholderSrc
+                  : product.images?.[selectedImage] || placeholderSrc
+              }
               alt={product.name}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
               priority
+              onError={() =>
+                setBrokenImageIndexes((prev) => ({ ...prev, [selectedImage]: true }))
+              }
             />
             <button className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
               <ZoomIn className="h-5 w-5 text-gray-700" />
@@ -112,10 +126,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 }`}
               >
                 <Image
-                  src={image}
+                  src={brokenImageIndexes[i] ? placeholderSrc : image}
                   alt={`${product.name} ${i + 1}`}
                   fill
                   className="object-cover"
+                  onError={() =>
+                    setBrokenImageIndexes((prev) => ({ ...prev, [i]: true }))
+                  }
                 />
               </button>
             ))}
@@ -170,7 +187,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           {/* Share Buttons */}
           <div className="mb-6">
             <ShareButtons
-              url={typeof window !== 'undefined' ? window.location.href : ''}
+              url={shareUrl}
               title={product.name}
             />
           </div>

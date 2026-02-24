@@ -57,7 +57,7 @@ async function main() {
       description: 'Trendy graphic print t-shirt. Bold design, comfortable fit.',
       price: 29.99,
       category: 't-shirts',
-      images: JSON.stringify(['https://images.unsplash.com/photo-1503341338985-c77d3e6960ec?w=500']),
+      images: JSON.stringify(['https://images.unsplash.com/photo-1520975958221-5a0b1f7a46b3?w=500']),
       sizes: JSON.stringify(['S', 'M', 'L', 'XL']),
       colors: JSON.stringify(['Black']),
       stock: 75,

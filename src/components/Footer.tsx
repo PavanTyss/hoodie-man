@@ -39,7 +39,10 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Hoodie Man. All rights reserved.</p>
+          <p>
+            &copy;{' '}
+            <span suppressHydrationWarning>{new Date().getFullYear()}</span> Hoodie Man. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

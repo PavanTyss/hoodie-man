@@ -1,14 +1,27 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { items, customerInfo, total } = body;
 
+    const session = await auth();
+    let userId = session?.user?.id;
+
+    if (!userId) {
+      const guest = await prisma.user.upsert({
+        where: { email: 'guest@hoodieman.local' },
+        update: { name: 'Guest' },
+        create: { email: 'guest@hoodieman.local', name: 'Guest' },
+      });
+      userId = guest.id;
+    }
+
     const order = await prisma.order.create({
       data: {
-        userId: 'guest', // For now, using guest. In production, get from session
+        userId,
         total,
         status: 'pending',
         shippingAddress: JSON.stringify({
@@ -40,7 +53,13 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const orders = await prisma.order.findMany({
+      where: { userId: session.user.id },
       include: {
         items: {
           include: {

@@ -20,6 +20,11 @@ export default function DashboardPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -140,7 +145,7 @@ export default function DashboardPage() {
                       <div>
                         <p className="text-sm text-gray-600">Order #{order.id.slice(0, 8)}</p>
                         <p className="text-xs text-gray-500">
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {mounted ? new Date(order.createdAt).toLocaleDateString() : ''}
                         </p>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>

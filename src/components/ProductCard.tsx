@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Product } from '@/types/product';
 import { useWishlist } from '@/context/WishlistContext';
 import { Heart, Star } from 'lucide-react';
-import { MouseEvent } from 'react';
+import { MouseEvent, useMemo, useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -14,6 +14,9 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
+  const placeholderSrc = '/product-placeholder.svg';
+  const initialSrc = useMemo(() => product.images?.[0] || placeholderSrc, [product.images]);
+  const [imgSrc, setImgSrc] = useState(initialSrc);
 
   const handleWishlistClick = (e: MouseEvent) => {
     e.preventDefault();
@@ -35,11 +38,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
           <div className="relative h-64 bg-gray-200 overflow-hidden">
             <Image
-              src={product.images[0]}
+              src={imgSrc}
               alt={product.name}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              onError={() => setImgSrc(placeholderSrc)}
             />
             {product.featured && (
               <span className="absolute top-2 left-2 bg-yellow-400 text-gray-900 px-2 py-1 text-xs font-semibold rounded">
