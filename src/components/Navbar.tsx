@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, FormEvent } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
-import { ShoppingCart, User, LogOut, Search, Heart } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Search, Heart, LayoutDashboard } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import MobileMenu from './MobileMenu';
 import ThemeToggle from './ThemeToggle';
@@ -17,6 +17,8 @@ export default function Navbar() {
   const wishlistCount = getWishlistCount();
   const { data: session } = useSession();
   const router = useRouter();
+  const role = (session?.user as { role?: string })?.role ?? '';
+  const isStaff = ['super_admin', 'admin', 'store_manager', 'delivery_agent'].includes(role);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (e: FormEvent) => {
@@ -95,6 +97,19 @@ export default function Navbar() {
             <ThemeToggle />
             {session ? (
               <div className="flex items-center gap-2">
+                {isStaff && (
+                  <>
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                      aria-label="Admin dashboard"
+                    >
+                      <LayoutDashboard className="h-5 w-5" />
+                      <span className="text-sm hidden sm:inline">Admin</span>
+                    </Link>
+                    <span className="text-sm text-muted-foreground/70 hidden sm:inline">|</span>
+                  </>
+                )}
                 <Link
                   href="/dashboard"
                   className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"

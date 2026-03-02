@@ -7,12 +7,73 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useState, use, useEffect } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Heart, Star, ZoomIn } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { ArrowLeft, Heart, Star, ZoomIn, Pencil, Trash2 } from 'lucide-react';
 import { Product } from '@/types/product';
 import ShareButtons from '@/components/ShareButtons';
 import ProductCard from '@/components/ProductCard';
 import Button from '@/components/ui/Button';
 import { formatPrice, PRODUCT_PLACEHOLDER_IMAGE } from '@/lib/format';
+
+function EditReviewForm({
+  review,
+  onSave,
+  onCancel,
+}: {
+  review: { rating: number; title: string | null; comment: string };
+  onSave: (data: { rating: number; title?: string | null; comment: string }) => void;
+  onCancel: () => void;
+}) {
+  const [rating, setRating] = useState(review.rating);
+  const [title, setTitle] = useState(review.title ?? '');
+  const [comment, setComment] = useState(review.comment);
+  return (
+    <form
+      className="mt-3 p-3 rounded-lg bg-muted/30 space-y-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSave({ rating, title: title.trim() || null, comment: comment.trim() });
+      }}
+    >
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1">Rating</label>
+        <select
+          value={rating}
+          onChange={(e) => setRating(Number(e.target.value))}
+          className="w-full max-w-[80px] px-2 py-1.5 rounded border border-border bg-background text-foreground text-sm"
+        >
+          {[1, 2, 3, 4, 5].map((n) => (
+            <option key={n} value={n}>{n} star{n > 1 ? 's' : ''}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1">Title (optional)</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full px-2 py-1.5 rounded border border-border bg-background text-foreground text-sm"
+          placeholder="Review title"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1">Comment</label>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={3}
+          className="w-full px-2 py-1.5 rounded border border-border bg-background text-foreground text-sm"
+          required
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit" size="sm">Save</Button>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel}>Cancel</Button>
+      </div>
+    </form>
+  );
+}
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -28,27 +89,103 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedImage, setSelectedImage] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [reviews, setReviews] = useState<{ id: string; rating: number; title: string | null; comment: string; userName: string; createdAt: string; isOwn?: boolean }[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  useSession(); // auth state for review ownership
 
   useEffect(() => {
-    Promise.all([
-      fetch(`/api/products/${id}`).then((res) => res.json()),
-      fetch('/api/products').then((res) => res.json()),
-    ])
-      .then(([productData, allProducts]) => {
+    fetch(`/api/products/${id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((productData) => {
+        if (!productData) {
+          setLoading(false);
+          return;
+        }
         setProduct(productData);
-        // Get related products from same category
-        const related = allProducts
-          .filter((p: Product) => p.category === productData.category && p.id !== productData.id)
-          .slice(0, 4);
-        setRelatedProducts(related);
-        setLoading(false);
+        const category = productData.category;
+        if (!category) {
+          setRelatedProducts([]);
+          setLoading(false);
+          return;
+        }
+        fetch(`/api/products?category=${encodeURIComponent(category)}&limit=5&sortBy=createdAt&sortOrder=desc`)
+          .then((r) => r.json())
+          .then((data) => {
+            const list = data?.items ?? [];
+            const related = list
+              .filter((p: Product) => p.id !== productData.id)
+              .slice(0, 4);
+            setRelatedProducts(related);
+          })
+          .catch(() => setRelatedProducts([]))
+          .finally(() => setLoading(false));
       })
       .catch(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync URL for share
     setShareUrl(window.location.href);
   }, [id]);
+
+  const loadReviews = () => {
+    if (!id) return;
+    setReviewsLoading(true);
+    fetch(`/api/products/${id}/reviews`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setReviews)
+      .catch(() => setReviews([]))
+      .finally(() => setReviewsLoading(false));
+  };
+
+  useEffect(() => {
+    loadReviews(); // eslint-disable-line react-hooks/set-state-in-effect -- data fetch
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps -- loadReviews refetch on id
+
+  const refetchProduct = () => {
+    fetch(`/api/products/${id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data && setProduct(data));
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!confirm('Delete this review?')) return;
+    try {
+      const res = await fetch(`/api/reviews/${reviewId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error ?? 'Failed to delete');
+        return;
+      }
+      toast.success('Review deleted');
+      loadReviews();
+      refetchProduct();
+    } catch {
+      toast.error('Failed to delete review');
+    }
+  };
+
+  const handleUpdateReview = async (reviewId: string, data: { rating: number; title?: string | null; comment: string }) => {
+    try {
+      const res = await fetch(`/api/reviews/${reviewId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error ?? 'Failed to update');
+        return;
+      }
+      toast.success('Review updated');
+      setEditingReviewId(null);
+      loadReviews();
+      refetchProduct();
+    } catch {
+      toast.error('Failed to update review');
+    }
+  };
 
   if (loading) {
     return (
@@ -289,6 +426,68 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               <li>• Machine washable</li>
               <li>• Available in multiple sizes and colors</li>
             </ul>
+          </div>
+
+          {/* Reviews */}
+          <div className="mt-8 border-t pt-8">
+            <h3 className="font-semibold text-foreground mb-4">Reviews ({reviews.length})</h3>
+            {reviewsLoading ? (
+              <p className="text-sm text-muted-foreground">Loading reviews…</p>
+            ) : reviews.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No reviews yet.</p>
+            ) : (
+              <ul className="space-y-4">
+                {reviews.map((r) => (
+                  <li key={r.id} className="border-b border-border pb-4 last:border-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${i < r.rating ? 'fill-warning text-warning' : 'text-muted'}`}
+                            />
+                          ))}
+                          <span className="text-sm text-muted-foreground">{r.userName}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {r.title && <p className="font-medium text-foreground text-sm">{r.title}</p>}
+                        <p className="text-sm text-muted-foreground">{r.comment}</p>
+                      </div>
+                      {r.isOwn && (
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setEditingReviewId(editingReviewId === r.id ? null : r.id)}
+                            className="p-1.5 rounded text-muted-foreground hover:bg-muted"
+                            title="Edit review"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteReview(r.id)}
+                            className="p-1.5 rounded text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                            title="Delete review"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {editingReviewId === r.id && (
+                      <EditReviewForm
+                        review={r}
+                        onSave={(data) => handleUpdateReview(r.id, data)}
+                        onCancel={() => setEditingReviewId(null)}
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>

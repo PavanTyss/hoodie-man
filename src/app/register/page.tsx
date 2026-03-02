@@ -35,7 +35,7 @@ export default function RegisterPage() {
       } else {
         setError(data.error || 'Registration failed');
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -71,6 +71,7 @@ export default function RegisterPage() {
                 required
                 minLength={6}
                 placeholder="Password (min 6 characters)"
+                showPasswordToggle
               />
             </div>
             <Button type="submit" fullWidth loading={loading} disabled={loading}>

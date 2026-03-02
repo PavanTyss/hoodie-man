@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import {
+  customerOrdersQuerySchema,
+  parseSearchParams,
+} from '@/lib/list-query';
+import type { Prisma } from '@prisma/client';
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +35,7 @@ export async function POST(request: Request) {
           address: customerInfo.address,
         }),
         items: {
-          create: items.map((item: any) => ({
+          create: items.map((item: { id: string; quantity: number; price: number; selectedSize?: string; selectedColor?: string }) => ({
             productId: item.id,
             quantity: item.quantity,
             price: item.price,
@@ -51,26 +56,56 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+/** GET: list current user's orders with pagination, filter, sort, search. */
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const orders = await prisma.order.findMany({
-      where: { userId: session.user.id },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
+    const parsed = parseSearchParams(
+      new URL(request.url).searchParams,
+      customerOrdersQuerySchema
+    );
+    if (!parsed.success) return parsed.error;
+    const { page, limit, status, sortBy, sortOrder, q } = parsed.data;
+
+    const where: Prisma.OrderWhereInput = { userId: session.user.id };
+    if (status) where.status = status;
+    if (q?.trim()) {
+      where.id = { contains: q.trim(), mode: 'insensitive' };
+    }
+
+    const orderBy: Prisma.OrderOrderByWithRelationInput =
+      sortBy === 'createdAt' ? { createdAt: sortOrder as 'asc' | 'desc' } : { createdAt: 'desc' };
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          items: { include: { product: true } },
         },
+      }),
+      prisma.order.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      items: orders,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { createdAt: 'desc' },
     });
-    return NextResponse.json(orders);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: 'Failed to fetch orders' },
+      { status: 500 }
+    );
   }
 }

@@ -1,13 +1,46 @@
-import { prisma } from '../src/lib/prisma';
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcryptjs';
+
+const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data (order of dependencies)
+  await prisma.auditLog.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.review.deleteMany();
   await prisma.wishlist.deleteMany();
+  await prisma.storeManager.deleteMany();
+  await prisma.adminScope.deleteMany();
   await prisma.product.deleteMany();
+  await prisma.store.deleteMany();
   await prisma.promoCode.deleteMany();
+  // Keep User, DeliveryAddress, Account, Session
+
+  // Ensure super@hoodie.local exists with known password (so login always works after seed)
+  const superAdminPassword = await hash('SuperAdmin1!', 12);
+  const superAdminUser = await prisma.user.upsert({
+    where: { email: 'super@hoodie.local' },
+    update: { role: 'super_admin', password: superAdminPassword, name: 'Super Admin' },
+    create: {
+      email: 'super@hoodie.local',
+      name: 'Super Admin',
+      password: superAdminPassword,
+      role: 'super_admin',
+    },
+  });
+  const ownerId = superAdminUser.id;
+
+  // Create store
+  const store = await prisma.store.upsert({
+    where: { slug: 'main-store' },
+    update: {},
+    create: {
+      name: 'Main Store',
+      slug: 'main-store',
+      createdById: ownerId,
+    },
+  });
 
   // Create products
   const products = [
@@ -60,7 +93,7 @@ async function main() {
       description: 'Trendy graphic print t-shirt. Bold design, comfortable fit.',
       price: 29.99,
       category: 't-shirts',
-      images: JSON.stringify(['https://images.unsplash.com/photo-1520975958221-5a0b1f7a46b3?w=500']),
+      images: JSON.stringify(['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500']),
       sizes: JSON.stringify(['S', 'M', 'L', 'XL']),
       colors: JSON.stringify(['Black']),
       stock: 75,
@@ -103,7 +136,7 @@ async function main() {
 
   for (const product of products) {
     await prisma.product.create({
-      data: product,
+      data: { ...product, storeId: store.id },
     });
   }
 
@@ -119,7 +152,36 @@ async function main() {
     ],
   });
 
+  // Seed test users for admin/store_manager/delivery_agent (idempotent; password reset on update so logins always work)
+  const testPassword = await hash('TestUser1!', 12);
+  await prisma.user.upsert({
+    where: { email: 'admin@hoodie.local' },
+    update: { role: 'admin', password: testPassword },
+    create: { email: 'admin@hoodie.local', name: 'Admin User', password: testPassword, role: 'admin' },
+  });
+  const mgrUser = await prisma.user.upsert({
+    where: { email: 'manager@hoodie.local' },
+    update: { role: 'store_manager', password: testPassword },
+    create: { email: 'manager@hoodie.local', name: 'Store Manager', password: testPassword, role: 'store_manager' },
+  });
+  const agentUser = await prisma.user.upsert({
+    where: { email: 'delivery@hoodie.local' },
+    update: { role: 'delivery_agent', password: testPassword },
+    create: { email: 'delivery@hoodie.local', name: 'Delivery Agent', password: testPassword, role: 'delivery_agent' },
+  });
+  await prisma.storeManager.upsert({
+    where: { userId_storeId: { userId: mgrUser.id, storeId: store.id } },
+    update: {},
+    create: { userId: mgrUser.id, storeId: store.id },
+  });
+  await prisma.storeManager.upsert({
+    where: { userId_storeId: { userId: agentUser.id, storeId: store.id } },
+    update: {},
+    create: { userId: agentUser.id, storeId: store.id },
+  });
+
   console.log('✅ Database seeded successfully!');
+  console.log('Test logins: super@hoodie.local / SuperAdmin1! (super_admin), admin@hoodie.local / TestUser1!, manager@hoodie.local / TestUser1!, delivery@hoodie.local / TestUser1!');
 }
 
 main()

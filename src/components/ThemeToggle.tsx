@@ -9,7 +9,7 @@ import type { ThemeMode } from '@/lib/theme';
  * Renders a dropdown or segmented control for theme selection.
  */
 export default function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const modes: { value: ThemeMode; label: string; icon: React.ReactNode }[] = [
     { value: 'light', label: 'Light', icon: <Sun className="h-4 w-4" /> },
     { value: 'dark', label: 'Dark', icon: <Moon className="h-4 w-4" /> },

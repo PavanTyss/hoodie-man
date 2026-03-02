@@ -1,26 +1,46 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import ProductCard from '@/components/ProductCard';
 import Button from '@/components/ui/Button';
 import { Product } from '@/types/product';
 
-const INITIAL_PAGE_SIZE = 12;
 const PAGE_SIZE = 12;
 
 /**
- * Renders a product grid with incremental "Load more" to avoid rendering all items at once.
- * Used on the home page for the "All Products" section.
+ * Renders a product grid with incremental "Load more" fetching from API.
+ * Uses server-rendered initial products for fast first paint; fetches more on demand.
  */
-export default function ProductGridWithLoadMore({ products }: { products: Product[] }) {
-  const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
-  const visible = products.slice(0, visibleCount);
-  const hasMore = products.length > visibleCount;
+export default function ProductGridWithLoadMore({
+  initialProducts,
+  totalProducts,
+}: {
+  initialProducts: Product[];
+  totalProducts: number;
+}) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [page, setPage] = useState(() => Math.ceil(initialProducts.length / PAGE_SIZE) || 1);
+  const [loading, setLoading] = useState(false);
+  const hasMore = products.length < totalProducts;
+
+  const loadMore = useCallback(() => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    const nextPage = page + 1;
+    fetch(`/api/products?page=${nextPage}&limit=${PAGE_SIZE}&sortBy=createdAt&sortOrder=desc`)
+      .then((res) => res.json())
+      .then((data) => {
+        const list = data?.items ?? [];
+        setProducts((prev) => [...prev, ...list]);
+        setPage(nextPage);
+      })
+      .finally(() => setLoading(false));
+  }, [page, loading, hasMore]);
 
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {visible.map((product) => (
+        {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
@@ -28,10 +48,11 @@ export default function ProductGridWithLoadMore({ products }: { products: Produc
         <div className="mt-10 text-center">
           <Button
             type="button"
-            onClick={() => setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, products.length))}
+            onClick={loadMore}
+            disabled={loading}
             aria-label="Load more products"
           >
-            Load more ({products.length - visibleCount} left)
+            {loading ? 'Loading…' : `Load more (${totalProducts - products.length} left)`}
           </Button>
         </div>
       )}

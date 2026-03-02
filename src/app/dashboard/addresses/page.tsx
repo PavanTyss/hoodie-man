@@ -7,6 +7,7 @@ import { MapPin, Plus, Pencil, Trash2, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { SortDropdown } from '@/components/ui/SortDropdown';
 
 type DeliveryAddress = {
   id: string;
@@ -46,9 +47,14 @@ export default function AddressesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [sortBy, setSortBy] = useState<'createdAt' | 'label'>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const fetchAddresses = () => {
-    fetch('/api/addresses')
+    const params = new URLSearchParams();
+    params.set('sortBy', sortBy);
+    params.set('sortOrder', sortOrder);
+    fetch(`/api/addresses?${params}`)
       .then((res) => (res.ok ? res.json() : []))
       .then(setAddresses)
       .catch(() => toast.error('Failed to load addresses'))
@@ -62,7 +68,7 @@ export default function AddressesPage() {
     }
     if (status !== 'authenticated') return;
     fetchAddresses();
-  }, [status, router]);
+  }, [status, router, sortBy, sortOrder]); // eslint-disable-line react-hooks/exhaustive-deps -- fetchAddresses stable; run on auth/sort
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -205,6 +211,11 @@ export default function AddressesPage() {
     </>
   );
 
+  const addressSortOptions = [
+    { value: 'createdAt', label: 'Date added' },
+    { value: 'label', label: 'Label' },
+  ];
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -220,6 +231,18 @@ export default function AddressesPage() {
             Add address
           </Button>
         )}
+      </div>
+      <div className="mb-6">
+        <SortDropdown
+          options={addressSortOptions}
+          value={sortBy}
+          order={sortOrder}
+          onChange={(by, order) => {
+            setSortBy(by as 'createdAt' | 'label');
+            setSortOrder(order);
+          }}
+          label="Sort by"
+        />
       </div>
 
       {loading ? (

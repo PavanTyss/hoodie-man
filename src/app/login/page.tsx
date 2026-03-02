@@ -35,7 +35,7 @@ export default function LoginPage() {
         router.push('/');
         router.refresh();
       }
-    } catch (err) {
+    } catch {
       toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -65,6 +65,7 @@ export default function LoginPage() {
                   type="password"
                   required
                   placeholder="Password"
+                  showPasswordToggle
                 />
                 <p className="mt-1 text-right text-sm">
                   <Link href="/forgot-password" className="text-primary hover:underline">

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-function parseProduct(product: any) {
+function parseProduct(product: Record<string, unknown>) {
   return {
     ...product,
     images: typeof product.images === 'string' ? JSON.parse(product.images) : product.images,
@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     return NextResponse.json(parseProduct(product));
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
   }
 }

@@ -25,6 +25,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   loading?: boolean;
   fullWidth?: boolean;
+  /** Not passed to DOM (avoids React warning when using Button asChild with Link) */
+  asChild?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -37,6 +39,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       fullWidth = false,
       disabled,
       children,
+      asChild: _asChild, // eslint-disable-line @typescript-eslint/no-unused-vars -- reserved for polymorphic; not passed to DOM
       ...props
     },
     ref

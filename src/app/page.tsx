@@ -1,6 +1,8 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Package, Shirt, ShoppingBag } from 'lucide-react';
+
+export const revalidate = 60; // Cache page for 60s for faster repeat visits
 import ProductCard from '@/components/ProductCard';
 import ProductGridWithLoadMore from '@/components/ProductGridWithLoadMore';
 import { getFeaturedProductsFromDB, getProductsFromDB } from '@/lib/api';
@@ -9,7 +11,7 @@ const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), 
 
 export default async function Home() {
   const featuredProducts = await getFeaturedProductsFromDB();
-  const allProducts = await getProductsFromDB();
+  const { items: initialProducts, total: totalProducts } = await getProductsFromDB();
 
   return (
     <div>
@@ -95,7 +97,7 @@ export default async function Home() {
       {/* All Products – incremental load more */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h2 className="text-3xl font-bold text-foreground mb-8">All Products</h2>
-        <ProductGridWithLoadMore products={allProducts} />
+        <ProductGridWithLoadMore initialProducts={initialProducts} totalProducts={totalProducts} />
       </section>
 
       {/* Newsletter Signup */}

@@ -4,17 +4,19 @@ import { auth } from '@/lib/auth';
 
 /**
  * GET /api/products/[id]/reviews
- * Returns reviews for a product (with user name if needed).
+ * Returns reviews for a product. When authenticated, includes isOwn for each review so UI can show Edit/Delete.
  */
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: productId } = await params;
+    const session = await auth();
+    const currentUserId = session?.user?.id ?? null;
 
     const reviews = await prisma.review.findMany({
       where: { productId },
       orderBy: { createdAt: 'desc' },
       include: {
-        user: { select: { name: true } },
+        user: { select: { name: true, id: true } },
       },
     });
 
@@ -28,6 +30,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         helpful: r.helpful,
         createdAt: r.createdAt,
         userName: r.user.name ?? 'Anonymous',
+        isOwn: currentUserId != null && r.user.id === currentUserId,
       }))
     );
   } catch (error) {

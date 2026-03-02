@@ -1,5 +1,19 @@
+import { Suspense } from 'react';
 import CategoryProducts from '@/components/CategoryProducts';
+import { getProductsByCategoryFromDB } from '@/lib/api';
 
-export default function TShirtsPage() {
-  return <CategoryProducts category="t-shirts" />;
+export const revalidate = 60;
+
+export default async function TShirtsPage() {
+  const initial = await getProductsByCategoryFromDB('t-shirts', {
+    limit: 12,
+    page: 1,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  });
+  return (
+    <Suspense fallback={<div className="min-h-[40vh] flex items-center justify-center text-muted-foreground">Loading…</div>}>
+      <CategoryProducts category="t-shirts" initialData={initial} />
+    </Suspense>
+  );
 }

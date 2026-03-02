@@ -19,11 +19,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        const rawEmail = credentials?.email;
+        const rawPassword = credentials?.password;
+        if (!rawEmail || !rawPassword) {
           return null;
         }
 
-        const email = sanitizeEmail(String(credentials.email));
+        const email = sanitizeEmail(String(rawEmail));
+        const password = String(rawPassword).trim();
 
         const user = await prisma.user.findFirst({
           where: {
@@ -35,7 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const isPasswordValid = await compare(credentials.password as string, user.password);
+        const isPasswordValid = await compare(password, user.password);
 
         if (!isPasswordValid) {
           return null;
@@ -45,7 +48,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
-          role: (user as any).role,
+          role: (user as { role?: string }).role,
         };
       },
     }),
@@ -69,7 +72,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: token.id as string,
           role: token.role as string,
         },
-      } as any;
+      } as typeof session & { user: { id: string; role: string } };
     },
   },
 });

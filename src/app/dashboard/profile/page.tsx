@@ -82,7 +82,7 @@ export default function ProfilePage() {
       } else {
         toast.error(data.error ?? 'Failed to update profile');
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to update profile');
     } finally {
       setSaving(false);
@@ -155,6 +155,7 @@ export default function ProfilePage() {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Required only when setting a new password"
+              showPasswordToggle
             />
             <Input
               label="New password"
@@ -162,6 +163,7 @@ export default function ProfilePage() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Min 8 characters"
+              showPasswordToggle
             />
             <Input
               label="Confirm new password"
@@ -169,6 +171,7 @@ export default function ProfilePage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter new password"
+              showPasswordToggle
             />
           </div>
         </section>

@@ -11,7 +11,7 @@ export default function ReturnsPage() {
         <div className="bg-primary/10 border-l-4 border-primary p-6 mb-8">
           <h3 className="text-xl font-bold text-foreground mb-2">Our Promise</h3>
           <p className="text-muted-foreground">
-            We want you to love your purchase! If you're not completely satisfied, we offer a
+            We want you to love your purchase! If you&apos;re not completely satisfied, we offer a
             hassle-free 30-day return policy for most items.
           </p>
         </div>
@@ -54,10 +54,10 @@ export default function ReturnsPage() {
           <ul className="list-disc pl-6 space-y-2">
             <li>Underwear and intimate apparel</li>
             <li>Earrings and pierced jewelry</li>
-            <li>Final sale items (marked as "Final Sale")</li>
+            <li>Final sale items (marked as &quot;Final Sale&quot;)</li>
             <li>Gift cards</li>
             <li>Customized or personalized items</li>
-            <li>Items marked as "non-returnable"</li>
+            <li>Items marked as &quot;non-returnable&quot;</li>
           </ul>
         </section>
 
@@ -82,7 +82,7 @@ export default function ReturnsPage() {
               Step 2: Receive Return Authorization
             </h3>
             <p>
-              We'll send you a Return Authorization (RA) number and return shipping label within 24
+              We&apos;ll send you a Return Authorization (RA) number and return shipping label within 24
               hours. Please do not ship items without an RA number.
             </p>
           </div>
@@ -131,7 +131,7 @@ export default function ReturnsPage() {
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Processing Time</h3>
               <p>
-                Once we receive your return, we'll inspect it and process your refund within{' '}
+                Once we receive your return, we&apos;ll inspect it and process your refund within{' '}
                 <strong>5-10 business days</strong>.
               </p>
             </div>
@@ -166,7 +166,7 @@ export default function ReturnsPage() {
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li>Contact us to arrange an exchange</li>
-            <li>We'll send the new item once we receive your return</li>
+            <li>We&apos;ll send the new item once we receive your return</li>
             <li>No additional shipping charges for exchanges on defective items</li>
             <li>Size/color exchanges subject to ₹500 shipping fee</li>
           </ul>
@@ -177,16 +177,16 @@ export default function ReturnsPage() {
           <p className="mb-4">If you receive a defective or damaged item:</p>
           <ol className="list-decimal pl-6 space-y-2">
             <li>Contact us immediately with photos of the defect/damage</li>
-            <li>We'll send a replacement or provide a full refund</li>
+            <li>We&apos;ll send a replacement or provide a full refund</li>
             <li>We cover all return shipping costs</li>
-            <li>No need to return the item if it's defective (we'll advise)</li>
+            <li>No need to return the item if it&apos;s defective (we&apos;ll advise)</li>
           </ol>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-foreground mb-4">Wrong Item Received</h2>
           <p>
-            If we sent you the wrong item, we'll make it right! Contact us and we'll send the
+            If we sent you the wrong item, we&apos;ll make it right! Contact us and we&apos;ll send the
             correct item at no additional charge and provide a prepaid return label for the wrong
             item.
           </p>
@@ -199,7 +199,7 @@ export default function ReturnsPage() {
             <li>Customer responsible for return shipping costs</li>
             <li>Items must be returned within 30 days</li>
             <li>Customs fees are non-refundable</li>
-            <li>Mark package as "Returned Goods" to avoid additional fees</li>
+            <li>Mark package as &quot;Returned Goods&quot; to avoid additional fees</li>
           </ul>
         </section>
 
@@ -207,7 +207,7 @@ export default function ReturnsPage() {
           <h2 className="text-2xl font-bold text-foreground mb-4">Sale and Clearance Items</h2>
           <p>
             Items purchased during sales or from our clearance section can be returned within 30
-            days unless marked as "Final Sale." All eligibility requirements still apply.
+            days unless marked as &quot;Final Sale.&quot; All eligibility requirements still apply.
           </p>
         </section>
 
@@ -226,7 +226,7 @@ export default function ReturnsPage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-foreground mb-4">Contact Us</h2>
-          <p className="mb-4">Questions about returns? We're here to help!</p>
+          <p className="mb-4">Questions about returns? We&apos;re here to help!</p>
           <ul className="list-none space-y-2">
             <li>
               <strong>Email:</strong> returns@hoodieman.com
@@ -244,7 +244,7 @@ export default function ReturnsPage() {
           <h3 className="text-xl font-bold text-foreground mb-2">Satisfaction Guaranteed</h3>
           <p className="text-muted-foreground">
             Your satisfaction is our priority. If you have any issues with your order, please reach
-            out to us. We're committed to making it right!
+            out to us. We&apos;re committed to making it right!
           </p>
         </div>
       </div>

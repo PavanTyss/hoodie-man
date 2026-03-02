@@ -90,7 +90,8 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (session?.user?.email) {
-      setFormData((prev) => ({
+      // Sync session to form (one-way)
+      setFormData((prev) => ({ // eslint-disable-line react-hooks/set-state-in-effect
         ...prev,
         email: (session.user as { email?: string }).email ?? prev.email,
         ...(prev.firstName === '' && (session.user as { name?: string }).name
@@ -104,7 +105,7 @@ export default function CheckoutPage() {
           : {}),
       }));
     }
-  }, [session?.user?.email, session?.user?.name]);
+  }, [session?.user?.email, session?.user?.name]); // eslint-disable-line react-hooks/exhaustive-deps -- session.user synced to form
 
   const handleSelectAddress = (addr: SavedAddress | null) => {
     setSelectedAddressId(addr?.id ?? null);
@@ -155,7 +156,7 @@ export default function CheckoutPage() {
         toast.error(data.error ?? 'Failed to place order. Please try again.');
         setIsSubmitting(false);
       }
-    } catch (error) {
+    } catch {
       toast.error('Error placing order. Please try again.');
       setIsSubmitting(false);
     }

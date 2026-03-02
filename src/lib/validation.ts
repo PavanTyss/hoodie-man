@@ -108,13 +108,13 @@ export function validatePassword(password: string): {
 /**
  * Sanitize object by removing undefined/null values
  */
-export function sanitizeObject<T extends Record<string, any>>(obj: T): Partial<T> {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
+export function sanitizeObject<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  return Object.entries(obj).reduce<Partial<T>>((acc, [key, value]) => {
     if (value !== undefined && value !== null) {
-      acc[key as keyof T] = value;
+      (acc as Record<string, unknown>)[key] = value;
     }
     return acc;
-  }, {} as Partial<T>);
+  }, {});
 }
 
 /**

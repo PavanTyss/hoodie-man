@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { Package, User, Heart, MapPin, LogOut } from 'lucide-react';
+import { Package, User, Heart, MapPin, LogOut, LayoutDashboard } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 
 /**
@@ -34,6 +34,8 @@ export default function DashboardLayout({
     );
   }
 
+  const role = (session.user as { role?: string })?.role ?? 'user';
+  const isStaff = ['super_admin', 'admin', 'store_manager', 'delivery_agent'].includes(role);
   const navItems = [
     { href: '/dashboard', icon: Package, label: 'Orders' },
     { href: '/dashboard/profile', icon: User, label: 'Profile' },
@@ -80,6 +82,15 @@ export default function DashboardLayout({
                   </Link>
                 );
               })}
+              {isStaff && (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+                >
+                  <LayoutDashboard className="h-5 w-5 shrink-0" />
+                  Admin
+                </Link>
+              )}
               <button
                 onClick={() => signOut()}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-error hover:bg-error/10 transition-colors"

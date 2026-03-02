@@ -55,7 +55,7 @@ function ResetPasswordContent() {
       } else {
         toast.error(data.error ?? 'Failed to reset password');
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to reset password');
     } finally {
       setLoading(false);
@@ -113,6 +113,7 @@ function ResetPasswordContent() {
             onChange={(e) => setNewPassword(e.target.value)}
             required
             placeholder="Min 8 characters"
+            showPasswordToggle
           />
           <Input
             label="Confirm new password"
@@ -120,6 +121,7 @@ function ResetPasswordContent() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            showPasswordToggle
           />
           <Button type="submit" fullWidth loading={loading} disabled={loading}>
             Reset password

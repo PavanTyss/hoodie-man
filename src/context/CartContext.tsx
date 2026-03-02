@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { CartItem, Product } from '@/types/product';
 
 /** Cart state: items with quantity, size, color. Persisted to localStorage. */
@@ -22,7 +22,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      setCart(JSON.parse(savedCart)); // eslint-disable-line react-hooks/set-state-in-effect -- hydrate from localStorage
     }
   }, []);
 
@@ -31,7 +31,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: Product, size: string, color: string) => {
+  const addToCart = useCallback((product: Product, size: string, color: string) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
         (item) =>
@@ -48,59 +48,69 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return [...prevCart, { ...product, quantity: 1, selectedSize: size, selectedColor: color }];
     });
-  };
+  }, []);
 
-  const removeFromCart = (productId: string, size: string, color: string) => {
+  const removeFromCart = useCallback((productId: string, size: string, color: string) => {
     setCart((prevCart) =>
       prevCart.filter(
         (item) =>
           !(item.id === productId && item.selectedSize === size && item.selectedColor === color)
       )
     );
-  };
+  }, []);
 
-  const updateQuantity = (productId: string, size: string, color: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId, size, color);
-      return;
-    }
+  const updateQuantity = useCallback(
+    (productId: string, size: string, color: string, quantity: number) => {
+      if (quantity <= 0) {
+        removeFromCart(productId, size, color);
+        return;
+      }
 
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === productId && item.selectedSize === size && item.selectedColor === color
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  };
-
-  const clearCart = () => {
-    setCart([]);
-  };
-
-  const getCartTotal = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
-
-  const getCartItemCount = () => {
-    return cart.reduce((count, item) => count + item.quantity, 0);
-  };
-
-  return (
-    <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        getCartTotal,
-        getCartItemCount,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+      setCart((prevCart) =>
+        prevCart.map((item) =>
+          item.id === productId && item.selectedSize === size && item.selectedColor === color
+            ? { ...item, quantity }
+            : item
+        )
+      );
+    },
+    [removeFromCart]
   );
+
+  const clearCart = useCallback(() => setCart([]), []);
+
+  const getCartTotal = useCallback(
+    () => cart.reduce((total, item) => total + item.price * item.quantity, 0),
+    [cart]
+  );
+
+  const getCartItemCount = useCallback(
+    () => cart.reduce((count, item) => count + item.quantity, 0),
+    [cart]
+  );
+
+  const value = useMemo(
+    () => ({
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      getCartTotal,
+      getCartItemCount,
+    }),
+    [
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      getCartTotal,
+      getCartItemCount,
+    ]
+  );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {

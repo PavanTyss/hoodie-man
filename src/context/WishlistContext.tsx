@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import { Product } from '@/types/product';
 
 /** Wishlist state: array of products persisted in localStorage. Actions: add, remove, check, count. */
@@ -21,7 +21,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem('wishlist');
     if (stored) {
-      setWishlist(JSON.parse(stored));
+      setWishlist(JSON.parse(stored)); // eslint-disable-line react-hooks/set-state-in-effect -- hydrate from localStorage
     }
   }, []);
 
@@ -29,38 +29,36 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addToWishlist = (product: Product) => {
+  const addToWishlist = useCallback((product: Product) => {
     setWishlist((prev) => {
-      if (prev.find((p) => p.id === product.id)) {
-        return prev;
-      }
+      if (prev.find((p) => p.id === product.id)) return prev;
       return [...prev, product];
     });
-  };
+  }, []);
 
-  const removeFromWishlist = (productId: string) => {
+  const removeFromWishlist = useCallback((productId: string) => {
     setWishlist((prev) => prev.filter((p) => p.id !== productId));
-  };
+  }, []);
 
-  const isInWishlist = (productId: string) => {
-    return wishlist.some((p) => p.id === productId);
-  };
-
-  const getWishlistCount = () => wishlist.length;
-
-  return (
-    <WishlistContext.Provider
-      value={{
-        wishlist,
-        addToWishlist,
-        removeFromWishlist,
-        isInWishlist,
-        getWishlistCount,
-      }}
-    >
-      {children}
-    </WishlistContext.Provider>
+  const isInWishlist = useCallback(
+    (productId: string) => wishlist.some((p) => p.id === productId),
+    [wishlist]
   );
+
+  const getWishlistCount = useCallback(() => wishlist.length, [wishlist]);
+
+  const value = useMemo(
+    () => ({
+      wishlist,
+      addToWishlist,
+      removeFromWishlist,
+      isInWishlist,
+      getWishlistCount,
+    }),
+    [wishlist, addToWishlist, removeFromWishlist, isInWishlist, getWishlistCount]
+  );
+
+  return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;
 }
 
 export function useWishlist() {

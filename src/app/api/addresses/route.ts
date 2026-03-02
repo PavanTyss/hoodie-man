@@ -1,26 +1,57 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { addressesQuerySchema, parseSearchParams } from '@/lib/list-query';
+import type { Prisma } from '@prisma/client';
 
 /**
  * GET /api/addresses - List all delivery addresses for the current user. Auth required.
+ * Query: sortBy (createdAt | label), sortOrder, q (optional search).
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const parsed = parseSearchParams(
+      new URL(request.url).searchParams,
+      addressesQuerySchema
+    );
+    if (!parsed.success) return parsed.error;
+    const { sortBy, sortOrder, q } = parsed.data;
+
+    const where: Prisma.DeliveryAddressWhereInput = {
+      userId: session.user.id,
+    };
+    if (q) {
+      where.OR = [
+        { label: { contains: q, mode: 'insensitive' } },
+        { address: { contains: q, mode: 'insensitive' } },
+        { city: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    const orderBy: Prisma.DeliveryAddressOrderByWithRelationInput[] = [
+      { isDefault: 'desc' },
+      sortBy === 'label'
+        ? { label: sortOrder }
+        : { createdAt: sortOrder },
+    ];
+
     const addresses = await prisma.deliveryAddress.findMany({
-      where: { userId: session.user.id },
-      orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+      where,
+      orderBy,
     });
 
     return NextResponse.json(addresses);
   } catch (error) {
     console.error('Addresses list error:', error);
-    return NextResponse.json({ error: 'Failed to fetch addresses' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch addresses' },
+      { status: 500 }
+    );
   }
 }
 

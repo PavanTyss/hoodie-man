@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -12,7 +11,6 @@ import Input from '@/components/ui/Input';
  * On success, redirects to login with a message.
  */
 export default function ForgotPasswordPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -37,7 +35,7 @@ export default function ForgotPasswordPage() {
       } else {
         toast.error(data.error ?? 'Something went wrong.');
       }
-    } catch (err) {
+    } catch {
       toast.error('Something went wrong.');
     } finally {
       setLoading(false);

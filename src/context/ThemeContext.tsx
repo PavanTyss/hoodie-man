@@ -27,7 +27,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
     if (stored && (stored === 'light' || stored === 'dark' || stored === 'system')) {
-      setThemeState(stored);
+      setThemeState(stored); // eslint-disable-line react-hooks/set-state-in-effect -- hydrate from localStorage
     }
     setMounted(true);
   }, []);
@@ -35,7 +35,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Compute resolved theme and apply data-theme to document
   useEffect(() => {
     const resolved = theme === 'system' ? getSystemTheme() : theme;
-    setResolvedTheme(resolved);
+    setResolvedTheme(resolved); // eslint-disable-line react-hooks/set-state-in-effect -- sync to DOM
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', resolved);
     }

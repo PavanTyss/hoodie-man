@@ -8,13 +8,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
  */
 export function useThrottle<T>(value: T, interval: number): T {
   const [throttledValue, setThrottledValue] = useState<T>(value);
-  const lastUpdated = useRef<number>(Date.now());
+  const lastUpdated = useRef<number>(0);
 
   useEffect(() => {
     const now = Date.now();
+    if (lastUpdated.current === 0) lastUpdated.current = now;
     if (now >= lastUpdated.current + interval) {
       lastUpdated.current = now;
-      setThrottledValue(value);
+      setThrottledValue(value); // eslint-disable-line react-hooks/set-state-in-effect -- throttle sync
     } else {
       const timer = setTimeout(
         () => {
@@ -41,7 +42,9 @@ export function useThrottledCallback<T extends (...args: unknown[]) => void>(
   const lastRan = useRef<number>(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fnRef = useRef(fn);
-  fnRef.current = fn;
+  useEffect(() => {
+    fnRef.current = fn;
+  }, [fn]);
 
   useEffect(() => {
     return () => {

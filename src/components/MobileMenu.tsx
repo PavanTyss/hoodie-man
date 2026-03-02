@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, Home, ShoppingBag, Shirt, Package, User, LogOut } from 'lucide-react';
+import { Menu, X, Home, ShoppingBag, Shirt, Package, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 
 /**
@@ -12,6 +12,8 @@ import { useSession, signOut } from 'next-auth/react';
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
+  const role = (session?.user as { role?: string })?.role ?? '';
+  const isStaff = ['super_admin', 'admin', 'store_manager', 'delivery_agent'].includes(role);
 
   return (
     <>
@@ -87,6 +89,16 @@ export default function MobileMenu() {
             {session ? (
               <>
                 <div className="border-t border-border my-2 pt-2" />
+                {isStaff && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 text-primary transition-colors"
+                  >
+                    <LayoutDashboard className="h-5 w-5" />
+                    <span>Admin</span>
+                  </Link>
+                )}
                 <Link
                   href="/dashboard"
                   onClick={() => setIsOpen(false)}

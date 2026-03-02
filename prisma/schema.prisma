@@ -20,17 +20,25 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  role          String    @default("user") // user or admin
+  role          String    @default("user") // super_admin | admin | store_manager | delivery_agent | user (customer)
   newsletter    Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts         Account[]
-  sessions         Session[]
-  orders           Order[]
-  reviews          Review[]
-  wishlist         Wishlist[]
-  deliveryAddresses DeliveryAddress[]
+  accounts              Account[]
+  sessions              Session[]
+  orders                Order[]
+  reviews               Review[]
+  wishlist              Wishlist[]
+  deliveryAddresses     DeliveryAddress[]
+  adminScopes           AdminScope[]
+  storesCreated         Store[]           @relation("StoreCreator")
+  storeManagers         StoreManager[]
+  ordersAssignedForDelivery Order[]       @relation("DeliveryAgent")
+
+  @@index([email])
+  @@index([role])
+  @@index([createdAt])
 }
 
 /// Saved delivery addresses for logged-in users. Selectable at checkout.
@@ -52,6 +60,8 @@ model DeliveryAddress {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([isDefault])
+  @@index([createdAt])
 }
 
 model Account {
@@ -89,6 +99,48 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Store {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  createdById String
+  createdBy   User     @relation("StoreCreator", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products       Product[]
+  storeManagers  StoreManager[]
+
+  @@index([createdById])
+  @@index([name])
+  @@index([slug])
+}
+
+model StoreManager {
+  id        String   @id @default(cuid())
+  userId    String
+  storeId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, storeId])
+  @@index([storeId])
+  @@index([userId])
+}
+
+model AdminScope {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scopeType  String   // store | product_category | customers
+  scopeValue String?
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, scopeType, scopeValue])
+  @@index([userId])
+}
+
 model Product {
   id          String   @id @default(cuid())
   name        String
@@ -104,36 +156,49 @@ model Product {
   views       Int      @default(0)
   rating      Float    @default(0)
   reviewCount Int      @default(0)
+  storeId     String?
+  store       Store?   @relation(fields: [storeId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   orderItems  OrderItem[]
   reviews     Review[]
   wishlist    Wishlist[]
 
   @@index([category])
   @@index([featured])
+  @@index([storeId])
+  @@index([name])
+  @@index([storeId, category])
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  userId          String
-  status          String      @default("pending") // pending, processing, shipped, delivered, cancelled
-  total           Float
-  discount        Float       @default(0)
-  promoCode       String?
-  shippingAddress String      // JSON object
-  paymentIntentId String?
-  paymentStatus   String      @default("unpaid") // unpaid, paid, refunded
-  trackingNumber  String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  
-  user            User        @relation(fields: [userId], references: [id])
-  items           OrderItem[]
+  id               String    @id @default(cuid())
+  userId           String
+  status           String    @default("pending") // pending | processing | accepted | assigned_to_delivery | yet_to_deliver | out_for_delivery | delivered | cancelled | pending_cancellation
+  total            Float
+  discount         Float     @default(0)
+  promoCode        String?
+  shippingAddress  String    // JSON object
+  paymentIntentId  String?
+  paymentStatus    String    @default("unpaid") // unpaid | paid | refunded
+  trackingNumber   String?
+  deliveryAgentId  String?
+  deliveryAgent    User?     @relation("DeliveryAgent", fields: [deliveryAgentId], references: [id])
+  acceptedAt       DateTime?
+  deliveryAssignedAt DateTime?
+  cancellationReason String?  // optional reason when customer requests cancel
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user    User        @relation(fields: [userId], references: [id])
+  items   OrderItem[]
 
   @@index([userId])
   @@index([status])
+  @@index([createdAt])
+  @@index([deliveryAgentId])
+  @@index([userId, createdAt])
 }
 
 model OrderItem {
@@ -201,4 +266,22 @@ model Newsletter {
   email       String   @unique
   subscribed  Boolean  @default(true)
   createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorEmail String?
+  action     String   // role_change | user_created | store_created | store_deleted | scopes_updated | order_accepted | delivery_assigned | delivery_status_updated | order_status_updated | payment_status_updated | product_created | product_deleted
+  entityType String   // user | store | order | product
+  entityId   String
+  details    String   // JSON
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([action])
 }

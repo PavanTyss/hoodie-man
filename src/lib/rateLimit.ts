@@ -76,3 +76,9 @@ export const newsletterRateLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
   maxRequests: 3, // 3 newsletter signups per hour
 });
+
+/** Public list/search (e.g. GET /api/products) – 120 req/min per IP. */
+export const publicReadRateLimiter = createRateLimiter({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 120,
+});

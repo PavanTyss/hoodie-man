@@ -6,12 +6,13 @@ import ProductCard from '@/components/ProductCard';
 import Button from '@/components/ui/Button';
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
+import type { Product } from '@/types/product';
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
 
-  const moveToCart = (product: any) => {
+  const moveToCart = (product: Product) => {
     addToCart(product, product.sizes[0], product.colors[0]);
     removeFromWishlist(product.id);
   };

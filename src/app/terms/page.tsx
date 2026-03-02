@@ -11,7 +11,7 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-foreground mb-4">1. Agreement to Terms</h2>
           <p>
-            By accessing and using Hoodie Man ("we," "our," or "us"), you accept and agree to be
+            By accessing and using Hoodie Man (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), you accept and agree to be
             bound by these Terms and Conditions. If you do not agree to these terms, please do not
             use our website or services.
           </p>
@@ -126,7 +126,7 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-foreground mb-4">10. Disclaimer of Warranties</h2>
           <p>
-            OUR WEBSITE AND PRODUCTS ARE PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR
+            OUR WEBSITE AND PRODUCTS ARE PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR
             IMPLIED. WE DO NOT WARRANT THAT THE WEBSITE WILL BE UNINTERRUPTED, ERROR-FREE, OR
             SECURE. WE DISCLAIM ALL WARRANTIES INCLUDING MERCHANTABILITY AND FITNESS FOR A
             PARTICULAR PURPOSE.
